@@ -1,0 +1,81 @@
+ Activity monitoring data analysis
+========================================================
+(Reproducible Research: Peer Assessment 1)
+========================================================
+It is now possible to collect a large amount of data about personal movement using activity monitoring devices such as a Fitbit, Nike Fuelband, or Jawbone Up. These type of devices are part of the "quantified self" movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. But these data remain under-utilized both because the raw data are hard to obtain and there is a lack of statistical methods and software for processing and interpreting the data.
+
+This assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.
+
+
+## Loading the date
+```{r}
+data <- read.csv('data/activity.csv')
+summary(data)
+```
+
+## Mean total number of steps taken per day:
+
+### Histogram of the total number of steps taken each day
+```{r fig.width=7, fig.height=10}
+library(lattice)
+data_date_steps_sum <- aggregate( steps~date, data, sum)
+barchart(data_date_steps_sum$date~data_date_steps_sum$steps)
+```
+
+### Mean and Median:
+```{r}
+summary (aggregate( steps~date, data, mean))
+summary(aggregate( steps~date, data, median))
+```
+## The Average daily  activity
+### Time series plot for "5-minute interval (x-axis)" X "the average number of steps taken, averaged across all days (y-axis)"
+```{r fig.width=7, fig.height=6}
+
+daily_interval_Avg <- aggregate( steps~interval, data, mean)
+plot(daily_interval_Avg$interval, daily_interval_Avg$steps, type="l")
+```
+
+### Interval with the maximum number of steps
+```{r}
+daily_interval_Avg[which.max(daily_interval_Avg$steps),"interval"]
+
+```
+
+## Imputing missing values
+
+### Number of NA entries
+```{r}
+d_na <- data$steps[is.na(data$steps)]
+length(d_na)
+```
+### Histogram of the total number of steps taken each day, after removing NA steps values:
+```{r fig.width=7, fig.height=10}
+data2 <- read.csv('data/activity.csv')
+data2$steps <- sapply(seq_len(17568),function(i) {if(is.na(data2[i,'steps'])){daily_interval_Avg[which(!is.na(match(daily_interval_Avg[, 'interval'],data2[i,'interval']))), 'steps']} else data2[i,'steps']})
+data_date_steps_sum2 <- aggregate( steps~date, data2, sum)
+barchart(data_date_steps_sum2$date~data_date_steps_sum2$steps)
+summary(data2)
+```
+
+### Mean and Median:
+```{r}
+summary(aggregate( steps~date, data2, mean))
+summary(aggregate( steps~date, data2, median))
+```
+Comparing those to the mean values before imputation, there is no big difference, which makes the method implemented transparent.
+
+
+## activity patterns between weekdays and weekends
+```{r}
+library('lattice')
+f <- factor(c('weekday','weekend'))
+data2[1, 'weekday'] <- f[1]
+
+
+data2$weekday <- sapply(seq_len(17568), function(i){if(!is.na(match(weekdays(as.Date(data2[i, 'date'])), c('Sunday', 'Saturday')))){f[2]}else{f[1]}})
+summary(data2)
+daily_interval_Avg3 <- aggregate( steps~interval+weekday, data2, mean)
+xyplot(daily_interval_Avg3$steps ~ daily_interval_Avg3$interval | daily_interval_Avg3$weekday, layout = c(1, 2), type='l')
+```
+The intervals between 500-1000 have increased activity in weekdays, which are between 8h-16h, so the numbers of steps are more during the day of weekdays when he might have more work.
+It can be assumed that the person wakes up during the weekdays at 8am, and during weekends around 11h-12h
