@@ -1,9 +1,9 @@
-xtest = read.table("data/test/X_test.txt")
-ytest = read.table("data/test/y_test.txt")
-sbjtest = read.table("data/test/subject_test.txt")
-xtrain = read.table("data/train/X_train.txt")
-ytrain = read.table("data/train/y_train.txt")
-sbjtrain = read.table("data/train/subject_train.txt")
+xtest = read.table("UCI HAR Dataset/test/X_test.txt")
+ytest = read.table("UCI HAR Dataset/test/y_test.txt")
+sbjtest = read.table("UCI HAR Dataset/test/subject_test.txt")
+xtrain = read.table("UCI HAR Dataset/train/X_train.txt")
+ytrain = read.table("UCI HAR Dataset/train/y_train.txt")
+sbjtrain = read.table("UCI HAR Dataset/train/subject_train.txt")
 
 
 xtest$Subject = sbjtest$V1
@@ -79,4 +79,4 @@ X$label = sapply(seq(length(X[,1])), function(i) {
 
 
 clean_set = aggregate(X[2:80], FUN=mean, by=list(X$Subject, X$label))
-write.csv(clean_set, "data/clean_data.txt")
+write.csv(clean_set, "clean_data.txt")
